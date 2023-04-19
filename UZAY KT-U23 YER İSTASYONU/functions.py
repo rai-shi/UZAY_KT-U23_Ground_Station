@@ -6,9 +6,6 @@ from tkinter import *
 from tkinter import ttk 
 from tkinter import filedialog
 
-#import matplotlib.pyplot as plt
-#import matplotlib.animation as animation
-#from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg)
 
@@ -16,7 +13,7 @@ import os
 
 import csv 
 
-import ftplib
+# import ftplib
 
 from pygrabber.dshow_graph import FilterGraph
 
@@ -32,9 +29,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from OpenGL.GLUT.freeglut import *
-#import numpy as np
 from pyopengltk import OpenGLFrame
-#import math
 
 import re 
 import threading
@@ -44,6 +39,18 @@ import threading
 ktu_blue= "#1f5ba1"
 light_grey = "#C6C7CA"
 dark_grey= "#282A3A"
+
+def clock(label:Label):
+    hour = time.strftime("%H")
+    minute = time.strftime("%M")
+    second = time.strftime("%S")
+    day= time.strftime("%d")
+    month= time.strftime("%m")
+    year= time.strftime("%Y")
+    
+    label.config(text= hour+":"+minute+":"+second+"   "+day+"/"+month+"/"+year)
+    label.after(1000, clock, label)
+
 
 class threadFactory():
     def __init__(self,target_, args_:tuple=None, daemon_:bool=False ):
@@ -67,16 +74,6 @@ class threadFactory():
         self.thread.join()  
         print("function close")
 
-def clock(label:Label):
-    hour = time.strftime("%H")
-    minute = time.strftime("%M")
-    second = time.strftime("%S")
-    day= time.strftime("%d")
-    month= time.strftime("%m")
-    year= time.strftime("%Y")
-    
-    label.config(text= hour+":"+minute+":"+second+"   "+day+"/"+month+"/"+year)
-    label.after(1000, clock, label)
 
 class HandleLine:
     def __init__(self):
@@ -89,7 +86,6 @@ class HandleLine:
     def getDatas(self):
         try:
             result = self.datas[-1]
-            #self.datas.pop(0)
             return result
         except:
             print("henüz veri yok")
@@ -171,7 +167,7 @@ def PortConnect(event:threading.Event, ser: serial.Serial, handler:HandleLine, t
 def isStatusWord(statusWord:str)->bool:
     statusWords = ["1","2", "3",
                   "4","5", 
-                  "6", "7", "8", "GELİŞTİRME"]
+                  "6", "7", "8", "GELISTIRME"]
     if statusWord in statusWords:
         return True
     else :
@@ -211,7 +207,6 @@ def ProperAras(arasCode:str)->str:  # yanlış kodu -1 yollar
 
     return aras1+aras2+aras3+aras4+aras5
 
-# saat düzeltilecek
 def ProperHour(hour:str)->str:
     
     pattern = "[0-9]+/[0-9]+/[0-9]+,[0-9]+/[0-9]+/[0-9]+"
@@ -219,21 +214,6 @@ def ProperHour(hour:str)->str:
         return hour 
     else:
         return "00/00/2023,00/00/00"
-    
-    #hourPart1 = str
-    #hourPart2 = str
-    #MinutePart1 = str
-    #MinutePart2 = str
-
-    #if (hour[0].isdigit()) and (hour[1].isdigit()) and (hour[3].isdigit()) and (hour[4].isdigit()):
-    #    hourPart1 = hour[0]
-    #    hourPart2 = hour[1]
-    #    MinutePart1 = hour[3]
-    #    MinutePart2 = hour[4]
-        
-    #    return hourPart1 + hourPart2 +":" + MinutePart1 + MinutePart2
-    #else:
-    #    return "00:00"
 
 def isHeight(height_param:str)->bool:
 
@@ -263,13 +243,9 @@ def isPositionData(position_param:str)->bool:
         return True
     else:
         return False
-      
-    
+        
 
 def ConvertDatas(datas:list)->list:
-    # önce veri istenilen türde mi kontrol et sonra istenilene dönüştür
-    # değilse 0.0 ya da null_str ata
-    #'3.14'.replace('.','',1).isdigit()
     
     properDatas = list()
 
@@ -379,8 +355,7 @@ def GetData(ser:serial.Serial, handler:HandleLine, text:Label, pureTeleLabel:Lab
 
             if pureData != b'':
 
-                # buraya dikkat 
-                #pureTeleLabel.configure(text=pureData)
+                #print(pureData)
                 try: 
                     strDatas = pureData.decode('UTF-8') # byte->str dönüşüm
                     lessThanSignCount = strDatas.count("<") # 19
@@ -475,6 +450,7 @@ def WriteAllOfIt(datas:list, tabFrame:Frame):
 
 global packet
 packet = 1
+
 def TeleTableListing(datas:list, tabFrame:Frame):
 
     global packet 
@@ -487,17 +463,6 @@ def TeleTableListing(datas:list, tabFrame:Frame):
 
     packet += 1
 
-#def GraphIt(myplot:Figure ,xindex:int, yindex:int, canvas:Canvas, datas:list, old_datas:list):
-
-#    x1 = int(xindex)
-#    y1 = float(datas[yindex])
-    
-#    if old_datas:
-#        x0 = int(x1-1)
-#        y0 = float(old_datas[yindex])
-#        myplot.plot( [x0,x1],[y0,y1], color='#0059aa', linestyle= '-') 
-
-#    canvas.draw()
 
 def GraphIt(dict_items:list ,xindex:int, datas:list, old_datas:list):
     for dict_item in dict_items:
@@ -508,8 +473,6 @@ def GraphIt(dict_items:list ,xindex:int, datas:list, old_datas:list):
             x0 = int(x1-1) 
             y0 = float(old_datas[dict_item['yindex']])
             dict_item['plot'].plot( [x0,x1], [y0,y1], color='#0059aa', linestyle= '-' )
-            #dict_item['plot'].autoscale()
-            #dict_item['plot'].ticklabel_format(useOffset=False)
         dict_item['canvas'].draw()
 
 def Aras(frames:list,values:str):
@@ -596,7 +559,7 @@ def StatuChange(statu_data:str, labels:list[Label] ):
             labels[6]['background'] = "green"
             labels[7]['background'] = "green"
 
-        if statu_data == "GELİŞTİRME":
+        if statu_data == "GELISTIRME" :
             labels[0]['background'] = "blue"
             labels[1]['background'] = "blue"
             labels[2]['background'] = "blue"
@@ -612,7 +575,7 @@ def Mapping(map_:tkintermapview.TkinterMapView, locationDatasList:list):
     y_locationYuk = locationDatasList[1]
 
     yukMap = map_
-   
+
     yukMap.delete_all_marker()
 
     yukMap.set_position(x_locationYuk,y_locationYuk, marker=True)          
@@ -632,7 +595,6 @@ def hexagone(z:float, colorTop:tuple, colorSide:tuple):
         ((-2,1,z+.5), (0,0,z+.5), (-1,2,z+.5)),
         ((-1,2,z+.5), (0,0,z+.5), (0,2,z+.5))
         ]
-    # .102, .178, .255
     glColor3f(*colorTop)
     glBegin(GL_TRIANGLES)  
     for triangles in tophexagone:
@@ -896,8 +858,6 @@ def timeLabelConfigure(timeLabel:Label, time:str):
     timeLabel.configure(text=time)
 
 
-# SIRALAMA KONTROL EDİLECEK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 def storeCSV(datas:list):  
     headers = ["PAKETNUMARASI","UYDUSTATÜSÜ","HATAKODU", "GÖNDERMESAATİ", "BASINÇ1", "BASINÇ2", 
                    "YÜKSEKLİK1", "YÜKSEKLİK2", "İRTİFAFARKI", "İNİŞHIZI", "SICAKLIK", "PİLGERİLİMİ", 
@@ -921,21 +881,23 @@ def storeCSV(datas:list):
     if (os.path.exists("TELEMETRI VERILERI/telemetri.csv")):
         w_datafile_csv = open("TELEMETRI VERILERI/telemetri.csv", "a", newline='')
         writer = csv.DictWriter(w_datafile_csv, fieldnames= headers )
-
-        for data_packet in datas:
-            csv_datas = {}
-            i=0 
-            for head in headers:
-                csv_datas[head] = data_packet[i] 
-                i += 1
-            writer.writerow(csv_datas)
+        writer.writerows(datas)
 
         w_datafile_csv.close()
+
+        #for data_packet in datas:
+        #    csv_datas = {}
+        #    i=0 
+        #    for head in headers:
+        #        csv_datas[head] = data_packet[i] 
+        #        i += 1
+        #    writer.writerow(csv_datas)
+
+        #w_datafile_csv.close()
 
 
 old_datas = list()
 all_datas = []
-#all_datas.append([ 0 , 'GELISTIRME', '00000', '12/12/23,12/30', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 145812])
 x:int = 1
 def StartListing( event:threading.Event, ser: serial.Serial, handler:HandleLine, text:Label, dottabFrame:Frame, alltabFrame:Frame, pureTeleLabel:Label, packetText:Label, graphes:list, aras_frames:list, statu_labels:list, map_:tkintermapview.TkinterMapView, timeLabel:Label, app:App3D  ):
     
@@ -956,7 +918,7 @@ def StartListing( event:threading.Event, ser: serial.Serial, handler:HandleLine,
         # storeCSV(datas)
         
         WriteAllOfIt(datas, dottabFrame)
-        #TeleTableListing(datas, alltabFrame) 
+        TeleTableListing(datas, alltabFrame)
         StatuChange(datas[1], statu_labels)
         locationDataList = list[float] 
         locationDataList = [datas[12], datas[13]]
@@ -975,17 +937,15 @@ def StartListing( event:threading.Event, ser: serial.Serial, handler:HandleLine,
 
         all_datas.append(datas)
         datas = []
-
     else:
         if 0 != len(all_datas):
             datas = all_datas[-1].copy()
 
-    text.after(700,StartListing,event, ser, handler, text, dottabFrame,alltabFrame,pureTeleLabel, packetText, graphes, aras_frames, statu_labels, map_, timeLabel, app)
+    text.after(800,StartListing,event, ser, handler, text, dottabFrame,alltabFrame,pureTeleLabel, packetText, graphes, aras_frames, statu_labels, map_, timeLabel, app)  # değiştirildi 700 de bir çağrılıyordu
 
 def OpenCSV():
     path = os.getcwd()+ "/TELEMETRI VERILERI"
     os.startfile(path)
-
 
 
 
@@ -1088,7 +1048,7 @@ global video_name
 video_name = str()
 
 def openVideoFile(): 
-    os.startfile(os.getcwd())
+    os.startfile(os.getcwd()+ "/ASENKRON")  
 
 def openAsenkronWin():
 
@@ -1121,7 +1081,7 @@ def openAsenkronWin():
     
     secondroot.focus()
     secondroot.mainloop()
-    # window.after(1, lambda: window.focus_force())
+
 
 def GetFileName(name:Text):
      dosya = name.get("1.0",END)
@@ -1153,7 +1113,7 @@ def ConnectServer(label:Label):
         # Yanıtın içindeki dosyayı indir
         if 'Content-Disposition' in response.headers:
             file_name = response.headers['Content-Disposition'].split('filename=')[-1].strip('"')
-            save_path= os.getcwd()+ "/asenkron" 
+            save_path= os.getcwd()+ "/ASENKRON" 
             completeName = os.path.join(save_path, file_name)
             with open(completeName, 'wb') as f:              
                 label.configure(text="dosya alınıyor", bg="green", fg="white"  )
@@ -1170,12 +1130,12 @@ def ConnectServer(label:Label):
 
 global cameraIndex
 cameraIndex = int()
-# bunu butona verip destroyu da ekleyebilirim
+
 def getCameraID(camVariable:IntVar, camIndex:int):
     print( "get variable: " + str(camVariable.get()))   
     global cameraIndex
     if ( isinstance(cameraIndex, int) ):
-        cameraIndex = camVariable.get() #camIndex-1
+        cameraIndex = camVariable.get()
     
 
 global capture_
@@ -1189,9 +1149,7 @@ def startCamera(win:Tk, label:Label):
     win.destroy()
 
     global cameraIndex
-    print("start: " + str(cameraIndex))
     capture = cv2.VideoCapture(1) 
-    #capture = cv2.VideoCapture(cameraIndex) 
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter('uzaykt-u23.mp4', fourcc, 20.0, (640, 480))
     global capture_

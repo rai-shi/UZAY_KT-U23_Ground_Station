@@ -1,8 +1,4 @@
-﻿# saat için
-#import time
-#import matplotlib.animation as animation
-#from mpl_toolkits.mplot3d import Axes3D
-#from tkinter import messagebox
+﻿
 
 from tkinter import *
 # graph için
@@ -39,7 +35,6 @@ light_grey = "#C6C7CA"
 dark_grey= "#282A3A"
 
 
-
 #margin options
 general_margin_options = {'padx':5, 'pady':5}
 
@@ -57,12 +52,13 @@ font_button = Font(family = "Helvetica", size = 8)
 font_label = Font(family = "Helvetica", size = 9)
 font_big = Font(family = "Helvetica", size = 16)
 
-#root.option_add("*TCombobox*Listbox*Font", font)
-
 
 #global değişkenler
 ser = serial.Serial()
 handler = HandleLine()
+TeleDatas=list()
+old_datas = list()
+thread_dict = {}
 
 
 # iconbitmap
@@ -90,7 +86,7 @@ ArasFrame.grid(row=0,column=3,padx=20,pady=10)
 
 aras_margins= {'padx':1, 'pady':1}
 
-Aras_svelocity = Frame(ArasFrame, width=45,height=45,bg="red") # genel olarak model uydu hızı olabilir
+Aras_svelocity = Frame(ArasFrame, width=45,height=45,bg="red") 
 Aras_svelocity.grid(row=0,column=0,**aras_margins)
 
 Aras_cvelocity = Frame(ArasFrame, width=45,height=45,bg="red")
@@ -201,6 +197,9 @@ statu_labels = [statuText1,statuText2,statuText3,statuText4,statuText5,statuText
 
 # ---------------------------------------------------------------------------------------------------------------------------
 
+# VIDEO TRANSFER 
+
+
 # base frame
 videoTransferFrame = Frame(narrowFrame,**narrowFrame_options,height=195, bg=light_grey)
 videoTransferFrame.grid(row=3,column=0, **narrowFrame_margins) 
@@ -233,10 +232,9 @@ getIPButton = Button(videoTransButtonFrame, text="Tamam", font=font_button, widt
 getIPButton.grid(row=0,column=0, padx=2, pady=3)
 
 
-global t_videoTransConnect
 def create_t_videoTransConnect():
-    global t_videoTransConnect
     t_videoTransConnect = threadFactory(target_=videoTransConnect, args_=(videoTransStatu,)) 
+    thread_dict['t_videoTransConnect'] = t_videoTransConnect
     t_videoTransConnect.create()
     t_videoTransConnect.start()
 
@@ -246,18 +244,19 @@ videoTransConnectButton.grid(row=1,column=0, padx=2, pady=3)
 videoTransPickFileButton = Button(videoTransButtonFrame, text="Dosya Seç" ,font=font_button, width=25,command=lambda: videoTransPickFile(videoTransStatu))
 videoTransPickFileButton.grid(row=2,column=0, padx=2, pady=3)
 
-global t_videoTransSend
+
 def create_t_videoTransSend():
-    global t_videoTransSend
-    t_videoTransSend = threadFactory(target_=videoTransSend, args_=(videoTransStatu,)) 
+    t_videoTransSend = threadFactory(target_=videoTransSend, args_=(videoTransStatu,))
+    thread_dict['t_videoTransSend'] = t_videoTransSend
     t_videoTransSend.create()
     t_videoTransSend.start()
 
 videoTransSendButton = Button(videoTransButtonFrame, text="Dosyayı Gönder", font=font_button, width=25, command=create_t_videoTransSend )  
 videoTransSendButton.grid(row=3,column=0, padx=2, pady=(3,0))
 
-# ---------------------------------------------------------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------------------------------------------------------
+# ASENKRON
 
 AsekronButtonFrame = Frame(narrowFrame,**narrowFrame_options,height=30, bg=light_grey)
 AsekronButtonFrame.grid(row=4,column=0, **narrowFrame_margins)
@@ -328,7 +327,6 @@ yukMap = tkintermapview.TkinterMapView(MapFrame, corner_radius=0, width=295, hei
 yukMap.pack(fill="both", expand = 1)
 yukMap.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
 yukMap.set_position(40.99300733397944, 39.77555646086991, marker=True) # (40.998066,39.763824) 40.99300733397944, 39.77555646086991
-# yukMap.set_zoom(10)
 
 
 #EXTENSIVE GRAPH SIDE
@@ -344,7 +342,7 @@ matplotlib.rc('font', **font)
 
 #basınç 1
 fig_plot1= Figure(figsize=(figSize_options), dpi=100)
-plot1= fig_plot1.add_subplot(111) # matplotlib.axes._subplots.AxesSubplot
+plot1= fig_plot1.add_subplot(111) 
 plot1.set_title(u'Görev Yükü Basıncı (hPa)',fontsize=12)
 plot1.autoscale()
 plot1.ticklabel_format(useOffset=False)
@@ -565,7 +563,7 @@ for j in range(1,20):
 scrollbar1 = ttk.Scrollbar(allTelemetryTabFrame, orient='vertical', command=allTelemetryCanvas.yview)
 
 allTelemetryTabFrame.bind("<MouseWheel>", OnMouseWheel) 
-# scrollbar.focus_set()
+scrollbar.focus_set()
 
 scrollbar1.pack(side=RIGHT, fill="y")
 allTelemetryCanvas.configure(yscrollcommand=scrollbar1.set)
@@ -595,6 +593,7 @@ SerialConText.pack()
 SerialConComboFrame = Frame(SerialConFrame, bg=light_grey) 
 SerialConComboFrame.grid(row=1,column=0, padx=4,pady=5)
 
+# port listing
 import serial.tools.list_ports
 ports = serial.tools.list_ports.comports()
 port_list = []
@@ -620,10 +619,6 @@ speedCombo = ttk.Combobox(SerialConComboFrame, textvariable=speed, font= font_la
 speedCombo.set("hız seçin") 
 speedCombo.grid(row=1,column=1, padx=5,pady=2) 
 
-# global değişkenler
-TeleDatas=list()
-old_datas = list()
-
 
 
 SerialConButtonFrame = Frame(SerialConFrame, bg=light_grey)
@@ -637,29 +632,24 @@ ButtonInnerFrame = Frame(SerialConButtonFrame, bg=light_grey)
 ButtonInnerFrame.grid(row=1,column=0, padx=2, pady=2)
 
 
-global t_port
 def create_t_port():
-    global t_port
     t_port = threadFactory(target_=PortConnect, args_=(ser, handler, SerialConText) ) 
+    thread_dict['t_port'] = t_port
     t_port.create()
     t_port.start()
 
 
-#t_port = threading.Thread ( target= PortConnect, args=(ser, handler, SerialConText) )
 PortConnectButton = Button(ButtonInnerFrame, text="Bağlantı Kur", font=font_button, width=15, 
                            command = create_t_port )
 PortConnectButton.grid(row=0,column=0, padx=2, pady=2)
 
-global thread_StartListing
+
+
 def create_thread_StartListing():
-    global thread_StartListing
     thread_StartListing = threadFactory(target_=StartListing, args_=( ser, handler, SerialConText, dotTelemetryTabFrame, allTelemetry,pureTelemetryLabel, PacketLabel, paramForGraphes, aras_frames, statu_labels, yukMap, DateTimeLabel, anim3d )) 
+    thread_dict['thread_StartListing'] = thread_StartListing
     thread_StartListing.create()
     thread_StartListing.start()
-
-#def thread_start():
-#    thread_StartListing = threading.Thread(target= StartListing,  args=( ser, handler, SerialConText, dotTelemetryTabFrame, allTelemetry,pureTelemetryLabel, PacketLabel, paramForGraphes, aras_frames, statu_labels, yukMap, DateTimeLabel, anim3d ) )
-#    thread_StartListing.start()
 
 StartTelemetryButton = Button(ButtonInnerFrame, text="Listelemeye Başla", font=font_button, width=15, command= create_thread_StartListing )
 StartTelemetryButton.grid(row=0,column=1, padx=2)
@@ -668,20 +658,16 @@ StartTelemetryButton.grid(row=0,column=1, padx=2)
 def finishListing(event:threading.Event):
     if event.is_set():
         return
-    thread_StartListing.finish()
-    #ser.setBreak(True)
-    #time.sleep(0.2)
-    #ser.sendBreak(duration = 0.02)
-    #time.sleep(0.2)
-
+    thread_dict['thread_StartListing'].finish()
     storeCSV(all_datas)
     ser.close()
-    t_port.finish()
+    thread_dict['t_port'].finish()
 
-global thread_FinishListing
+
+
 def create_thread_FinishListing():
-    global thread_FinishListing
     thread_FinishListing = threadFactory(target_=finishListing)
+    thread_dict['thread_FinishListing'] = thread_FinishListing
     thread_FinishListing.create()
     thread_FinishListing.start()
     
@@ -698,8 +684,6 @@ CleanButton.grid(row=2,column=0, padx=2, pady=2)
 
 
 #--------------------------------------------------------------------------------------------------------
-#belki içlerine argüman olarak verilerek başka bir dosyada yine yazılırlardı.
-
 
 def battery():
     battery_info = psutil.sensors_battery
