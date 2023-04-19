@@ -482,12 +482,9 @@ dotTelemetryTabFrame.pack(fill="both", expand = 1)
 allTelemetryTabFrame = Frame(telemetryDisplay,bg= light_grey)
 allTelemetryTabFrame.pack(fill="both", expand = 1)
 
-pureTelemetryTabFrame = Frame(telemetryDisplay,bg= light_grey)
-pureTelemetryTabFrame.pack(fill="both", expand = 1)
 
 telemetryDisplay.add(dotTelemetryTabFrame, text= u"Anlık Telemetri")
 telemetryDisplay.add(allTelemetryTabFrame, text= u"Hepsini Göster")
-telemetryDisplay.add(pureTelemetryTabFrame, text= u"Serial Gösterimi")
 
 
 # 19 veri
@@ -537,7 +534,7 @@ allTelemetry.bind(
         scrollregion=allTelemetryCanvas.bbox("all") ) )
 
 def OnMouseWheel(event):
-    scrollbar.yview("scroll",event.delta,"units")
+    scrollbar1.yview("scroll",event.delta,"units")
     return "break"
 
 
@@ -563,17 +560,12 @@ for j in range(1,20):
 scrollbar1 = ttk.Scrollbar(allTelemetryTabFrame, orient='vertical', command=allTelemetryCanvas.yview)
 
 allTelemetryTabFrame.bind("<MouseWheel>", OnMouseWheel) 
-scrollbar.focus_set()
+scrollbar1.focus_set()
 
 scrollbar1.pack(side=RIGHT, fill="y")
 allTelemetryCanvas.configure(yscrollcommand=scrollbar1.set)
 
 
-
-# pure telemetry tab context
-
-pureTelemetryLabel = Label(pureTelemetryTabFrame, text="serial data", anchor='center', width=130 , font=font_label, bg=light_grey )  
-pureTelemetryLabel.place(relx=.5, rely=.5,anchor= CENTER)
 
 
 #SERIAL CONNECTION
