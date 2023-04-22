@@ -72,7 +72,7 @@ TopFrame.grid_propagate(False)
 
 topFrame_margings= {'padx':5, 'pady':10}
 
-DateTimeLabel = Label(TopFrame, text="00/00/2023,00/00/00", width=18, font=font_big, bg= dark_grey ,fg="white")
+DateTimeLabel = Label(TopFrame, text="00/00/2023-00/00/00", width=18, font=font_big, bg= dark_grey ,fg="white")
 DateTimeLabel.grid(row=0,column=0,padx=(2,5),pady=10)
 
 TeamNoLabel = Label(TopFrame, text="TAKIM NO: 643953", font= font_big,bg=dark_grey, fg="white" )
@@ -155,8 +155,8 @@ narrowFrame = Frame(bottomFrame, width=225, height=1000, bg=dark_grey)
 narrowFrame.grid(row=0,column=0, pady=1)
 narrowFrame.grid_propagate(False) 
 
-narrowFrame_margins = {'padx':3,'pady':2}
-narrowFrame_options = {'border':3, 'width':220}
+narrowFrame_margins = {'padx':1,'pady':2}
+narrowFrame_options = {'width':230}
 narrowFrame_text_options = {'anchor':'w', 'width':32 }
 
 #LOGO
@@ -199,60 +199,92 @@ statu_labels = [statuText1,statuText2,statuText3,statuText4,statuText5,statuText
 
 # VIDEO TRANSFER 
 
-
-# base frame
-videoTransferFrame = Frame(narrowFrame,**narrowFrame_options,height=195, bg=light_grey)
+videoTransferFrame = Frame(narrowFrame,**narrowFrame_options,height=205, bg=light_grey)
 videoTransferFrame.grid(row=3,column=0, **narrowFrame_margins) 
 videoTransferFrame.grid_propagate(False)
 
 # video transfer statu frame
 videoTransStatuFrame = Frame(videoTransferFrame) 
-videoTransStatuFrame.grid(row=0,column=0, padx=4,pady=4)
+videoTransStatuFrame.grid(row=0,column=0,pady=5)
 videoTransStatuFrame.grid_propagate(False)
 
 videoTransStatu = Label(videoTransStatuFrame, text="BAĞLANTI SAĞLAYIN", anchor='center', width=28 , font=font_label, bg="red", fg="white"  )
 videoTransStatu.pack()
 
-# IP Text Frame
-videoTransIPtextFrame = Frame(videoTransferFrame, bg=light_grey)
-videoTransIPtextFrame.grid(row=1,column=0, padx=4,pady=4)
+# Text Frame
 
-videoTransIPlabel = Label(videoTransIPtextFrame, text="IP: ", width=3, anchor="w", font= font_label, bg=light_grey)
-videoTransIPlabel.grid(row=0,column=0, padx=(5,1))
+videoTransTextFrame = Frame(videoTransferFrame, bg=light_grey)
+videoTransTextFrame.grid(row=1,column=0, padx=4, pady=3)
 
-videoTransIPtext = Text(videoTransIPtextFrame, width=18,height=1)
-videoTransIPtext.insert(END, "http://192.168.4.5")
-videoTransIPtext.grid(row=0,column=1)
+videoTransIPlabel = Label(videoTransTextFrame, text="IP: ", width=10, anchor="w", font= font_label, bg=light_grey)
+videoTransIPlabel.grid(row=0,column=0, padx=2, pady=3)
+videoTransIPtext = Text(videoTransTextFrame, width=13,height=1)
+videoTransIPtext.insert(END, "192.168.4.1")
+videoTransIPtext.grid(row=0,column=1, pady=3)
+
+videoTransNamelabel = Label(videoTransTextFrame, text="Name: ", width=10, anchor="w", font= font_label, bg=light_grey)
+videoTransNamelabel.grid(row=1,column=0, padx=2, pady=2)
+videoTransNametext = Text(videoTransTextFrame, width=13,height=1)
+videoTransNametext.insert(END, "UzayKT-U23")
+videoTransNametext.grid(row=1,column=1, pady=2)
+
+videoTransPasswordlabel = Label(videoTransTextFrame, text="Password: ", width=10, anchor="w", font= font_label, bg=light_grey)
+videoTransPasswordlabel.grid(row=2,column=0, padx=2, pady=3)
+videoTransPasswordtext = Text(videoTransTextFrame, width=13,height=1)
+videoTransPasswordtext.insert(END, "123456")
+videoTransPasswordtext.grid(row=2,column=1, pady=3)
+
+# Progress Bar
+FTPprogressBar = ttk.Progressbar(videoTransferFrame,
+                                    length=150, mode="determinate")
+FTPprogressBar.grid(row=3, column=0, pady=3)
+
+
+ftp_object = FTPVersion(videoTransStatu, FTPprogressBar, videoTransIPtext, videoTransNametext, videoTransPasswordtext)
+
+def create_thread_Connect():
+    threadgetConnect = threadFactory(target_=ftp_object.Connect )
+    thread_dict['threadgetConnect'] = threadgetConnect
+    threadgetConnect.create()
+    threadgetConnect.start()
+
+
+def create_thread_PickFile():
+    threadPickFile = threadFactory(target_=ftp_object.PickFile )
+    thread_dict['threadPickFile'] = threadPickFile
+    threadPickFile.create()
+    threadPickFile.start()
+
+
+def create_thread_SendFile():
+    threadSendFile = threadFactory(target_=ftp_object.SendFile )
+    thread_dict['threadSendFile'] = threadSendFile
+    threadSendFile.create()
+    threadSendFile.start()
+
+
+def create_thread_Disconnect():
+    threadDisconnect = threadFactory(target_=ftp_object.Disconnect )
+    thread_dict['threadDisconnect'] = threadDisconnect
+    threadDisconnect.create()
+    threadDisconnect.start()
+
 
 # Button Frame
 videoTransButtonFrame = Frame(videoTransferFrame, bg=light_grey)
-videoTransButtonFrame.grid(row=2,column=0, padx=4,pady=4)
+videoTransButtonFrame.grid(row=2,column=0, padx=4, pady=1)
+ 
+videoTransConnectButton = Button(videoTransButtonFrame, text="Bağlantı Kur", font=font_button,command = create_thread_Connect, width=15 )
+videoTransConnectButton.grid(row=0,column=0, padx=2, pady=2)
 
-getIPButton = Button(videoTransButtonFrame, text="Tamam", font=font_button, width=25, command=lambda:getIP(videoTransIPtext) )
-getIPButton.grid(row=0,column=0, padx=2, pady=3)
+videoTransPickFileButton = Button(videoTransButtonFrame, text="Dosya Seç" ,font=font_button, command = create_thread_PickFile, width=15 )
+videoTransPickFileButton.grid(row=0,column=1, padx=2, pady=2)
 
+videoTransSendButton = Button(videoTransButtonFrame, text="Dosyayı Gönder", font=font_button, command= create_thread_SendFile, width=15 )
+videoTransSendButton.grid(row=1,column=0, padx=2, pady=2)
 
-def create_t_videoTransConnect():
-    t_videoTransConnect = threadFactory(target_=videoTransConnect, args_=(videoTransStatu,)) 
-    thread_dict['t_videoTransConnect'] = t_videoTransConnect
-    t_videoTransConnect.create()
-    t_videoTransConnect.start()
-
-videoTransConnectButton = Button(videoTransButtonFrame, text="Bağlan", font=font_button, width=25, command=create_t_videoTransConnect ) 
-videoTransConnectButton.grid(row=1,column=0, padx=2, pady=3)
-
-videoTransPickFileButton = Button(videoTransButtonFrame, text="Dosya Seç" ,font=font_button, width=25,command=lambda: videoTransPickFile(videoTransStatu))
-videoTransPickFileButton.grid(row=2,column=0, padx=2, pady=3)
-
-
-def create_t_videoTransSend():
-    t_videoTransSend = threadFactory(target_=videoTransSend, args_=(videoTransStatu,))
-    thread_dict['t_videoTransSend'] = t_videoTransSend
-    t_videoTransSend.create()
-    t_videoTransSend.start()
-
-videoTransSendButton = Button(videoTransButtonFrame, text="Dosyayı Gönder", font=font_button, width=25, command=create_t_videoTransSend )  
-videoTransSendButton.grid(row=3,column=0, padx=2, pady=(3,0))
+DisconnectButton = Button(videoTransButtonFrame, text="Bağlantıyı Kapat", font=font_button, command= create_thread_Disconnect, width=15 )
+DisconnectButton.grid(row=1,column=1, padx=2, pady=2)
 
 
 # ---------------------------------------------------------------------------------------------------------------------------
@@ -262,9 +294,8 @@ AsekronButtonFrame = Frame(narrowFrame,**narrowFrame_options,height=30, bg=light
 AsekronButtonFrame.grid(row=4,column=0, **narrowFrame_margins)
 AsekronButtonFrame.grid_propagate(False)
 
-AsenkronButton = Button(AsekronButtonFrame, text="Asenkron Video Alımı", font=font_button, width=32, command=openAsenkronWin)
-AsenkronButton.place(relx=.5, rely=.5,anchor= CENTER)
-
+AsenkronButton = Button(AsekronButtonFrame, text="Asenkron Video Alımı", font=font_button, width=30, command=openAsenkronWin)
+AsenkronButton.grid(row=0, column=0, padx=13, pady=2)
 
 
 
@@ -289,6 +320,7 @@ extensiveTopLeftFrame = Frame(extensiveTopFrame, width=300, height=500, bg=dark_
 extensiveTopLeftFrame.grid(row=0,column=0)
 
 
+# CAMERA 
 
 cameraFrame = Frame(extensiveTopLeftFrame, width=295, height=245, bg=light_grey)
 cameraFrame.grid(row=0,column=0, **extensiveFrame_margins)
@@ -297,27 +329,23 @@ cameraFrame.grid_propagate(False)
 camera_label = Label(cameraFrame,width=42,height=13, bg = light_grey)
 camera_label.grid(row=0,column=0, pady=2)
 
-
-capture = cv2.VideoCapture(1) 
-fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-out = cv2.VideoWriter('uzaykt-u23.mp4', fourcc, 20.0, (640, 480))
-
-
 cameraButtonFrame = Frame(cameraFrame, bg= light_grey) 
-cameraButtonFrame.grid(row=1,column=0,padx=2, pady=2)
+cameraButtonFrame.grid(row=1,column=0,padx=1, pady=2)
 
+cam = CameraStream()
 
-cameraConnectButton = Button(cameraButtonFrame, text=u"Kameraya Bağlan", width=14, command = lambda : SelectCamera(camera_label) )
-cameraConnectButton.grid(row=0,column=0,padx=2)
+cameraConnectButton = Button(cameraButtonFrame, text=u"Kameraya Bağlan", width=13, command = lambda : cam.SelectCamera(camera_label) )
+cameraConnectButton.grid(row=0,column=0,padx=1)
 
-cameraStopButton = Button(cameraButtonFrame, text=u"Kaydı Bitir",width=12, command= finishStream)
+cameraStopButton = Button(cameraButtonFrame, text=u"Kaydı Bitir",width=10, command= cam.finishStream)
 cameraStopButton.grid(row=0,column=1,padx=2)
 
-openCameraFileButton = Button(cameraButtonFrame, text=u"Dosyayı Aç", width= 12, command = openCameraFile)
-openCameraFileButton.grid(row=0,column=2,padx=2)
+openCameraFileButton = Button(cameraButtonFrame, text=u"Dosyayı Aç", width= 10, command = cam.openCameraFile)
+openCameraFileButton.grid(row=0,column=2,padx=1)
 
 
 
+# MAP
 
 MapFrame = Frame(extensiveTopLeftFrame, bg=light_grey)
 MapFrame.grid(row=1,column=0, **extensiveFrame_margins)
@@ -326,7 +354,7 @@ MapFrame.grid_propagate(False)
 yukMap = tkintermapview.TkinterMapView(MapFrame, corner_radius=0, width=295, height=250)
 yukMap.pack(fill="both", expand = 1)
 yukMap.set_tile_server("https://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-yukMap.set_position(40.99300733397944, 39.77555646086991, marker=True) # (40.998066,39.763824) 40.99300733397944, 39.77555646086991
+yukMap.set_position(40.99300733397944, 39.77555646086991, marker=True)
 
 
 #EXTENSIVE GRAPH SIDE
@@ -470,21 +498,18 @@ anim3d.animate = 900
 
 
 # creating tab notebook
-telemetryDisplay = ttk.Notebook(extensiveBottomFrame, width=1025, height=210)
+telemetryDisplay = Frame(extensiveBottomFrame, bg=dark_grey, width=1025, height=235)
 telemetryDisplay.grid(row=0,column=1,**extensiveFrame_margins)
 telemetryDisplay.grid_propagate(False)
-
+    
 # creating dot telemetry tab
-dotTelemetryTabFrame = Frame(telemetryDisplay, bg=light_grey)
-dotTelemetryTabFrame.pack(fill="both", expand = 1)
+dotTelemetryTabFrame = Frame(telemetryDisplay, bg=light_grey, width=990 )
+dotTelemetryTabFrame.grid(row=0,column=0, pady=(0,1))
 
 # creating alltelemetry tab
 allTelemetryTabFrame = Frame(telemetryDisplay,bg= light_grey)
-allTelemetryTabFrame.pack(fill="both", expand = 1)
+allTelemetryTabFrame.grid(row=1,column=0)
 
-
-telemetryDisplay.add(dotTelemetryTabFrame, text= u"Anlık Telemetri")
-telemetryDisplay.add(allTelemetryTabFrame, text= u"Hepsini Göster")
 
 
 # 19 veri
@@ -509,9 +534,8 @@ units = [
 dataIndex = 0
 for col in range(4):
     for rw in range(5):
-        # teleTitle[data] = teleTitle[data].encode('UTF-8')
         textData = Label(dotTelemetryTabFrame, anchor = "w",width= 32, font=font_label, text= (teleTitle[dataIndex]+ units[dataIndex]) , bg=light_grey)
-        textData.grid(row=rw, column=col, padx=4, pady=10)
+        textData.grid(row=rw, column=col, padx=10, pady=1)
         dataIndex = dataIndex + 1 
 
 
@@ -520,12 +544,11 @@ for col in range(4):
 # all telemetry tab context
 
 # creating canvas for scrollbar 
-allTelemetryCanvas = Canvas(allTelemetryTabFrame, bg=light_grey)
+allTelemetryCanvas = Canvas(allTelemetryTabFrame, bg=light_grey, height=115, width=980)
 allTelemetryCanvas.pack(side="left", fill="both", expand=True)
 
 # creating frame for content
-allTelemetry = Frame(allTelemetryCanvas, bg= light_grey )
-# allTelemetry.pack(fill="both", expand = 1)
+allTelemetry = Frame(allTelemetryCanvas, bg= light_grey)
 allTelemetryCanvas.create_window((0, 0), window=allTelemetry, anchor="nw")
 
 allTelemetry.bind(
@@ -538,7 +561,7 @@ def OnMouseWheel(event):
     return "break"
 
 
-tableTeleTitle = [" ","Paketno","Durum","ARAS", "Saat",
+tableTeleTitle = ["Paketno","Durum","ARAS", "Saat",
         "1Basınç","2Basınç",
         "1Yükseklik","2Yükseklik",
         "İrtifaFarkı","İnişHızı",
@@ -548,12 +571,9 @@ tableTeleTitle = [" ","Paketno","Durum","ARAS", "Saat",
         "Pitch","Roll","Yaw",
         "Takım No"]
 
-# başlığın başında bir boşluk
-empty = Label(allTelemetry, text=" ", bg= light_grey, width=2)
-empty.grid(row=0,column=0,padx=2, pady=0.5)
 
 # başlıklar
-for j in range(1,20):
+for j in range(19):
     entry = Label(allTelemetry,text=tableTeleTitle[j], font=("Helvetica",8),bg= light_grey, anchor='w', width=7, bd=2)
     entry.grid(row=0, column=j,padx=2, pady=0.5)
 
@@ -564,12 +584,12 @@ scrollbar1.focus_set()
 
 scrollbar1.pack(side=RIGHT, fill="y")
 allTelemetryCanvas.configure(yscrollcommand=scrollbar1.set)
-
+scrollbar1.set(1.0, 1.0)
 
 
 
 #SERIAL CONNECTION
-SerialConFrame = Frame(narrowFrame,**narrowFrame_options,height=224, bg=light_grey)
+SerialConFrame = Frame(narrowFrame,**narrowFrame_options,height=219, bg=light_grey)
 SerialConFrame.grid(row=2,column=0, **narrowFrame_margins)
 SerialConFrame.grid_propagate(False)
 
@@ -578,7 +598,7 @@ SerialConTextFrame = Frame(SerialConFrame)
 SerialConTextFrame.grid(row=0,column=0, padx=4,pady=5)
 SerialConTextFrame.grid_propagate(False)
 
-SerialConText = Label(SerialConTextFrame, text="BAĞLANTI SAĞLAYIN", anchor='center', width=28 , font=font_label, bg="red", fg="white"  )
+SerialConText = Label(SerialConTextFrame, text="BAĞLANTI SAĞLAYIN", anchor='center', width=28 , font=font_label, bg="red", fg="white" )
 SerialConText.pack()
 
 
@@ -621,7 +641,7 @@ getConInfoButton = Button(SerialConButtonFrame, text="Tamam", font=font_button, 
 getConInfoButton.grid(row=0,column=0, padx=2, pady=2)
 
 ButtonInnerFrame = Frame(SerialConButtonFrame, bg=light_grey) 
-ButtonInnerFrame.grid(row=1,column=0, padx=2, pady=2)
+ButtonInnerFrame.grid(row=1,column=0, padx=4, pady=2)
 
 
 def create_t_port():
@@ -638,7 +658,7 @@ PortConnectButton.grid(row=0,column=0, padx=2, pady=2)
 
 
 def create_thread_StartListing():
-    thread_StartListing = threadFactory(target_=StartListing, args_=( ser, handler, SerialConText, dotTelemetryTabFrame, allTelemetry,pureTelemetryLabel, PacketLabel, paramForGraphes, aras_frames, statu_labels, yukMap, DateTimeLabel, anim3d )) 
+    thread_StartListing = threadFactory(target_=StartListing, args_=( ser, handler, SerialConText, dotTelemetryTabFrame, allTelemetry, PacketLabel, paramForGraphes, aras_frames, statu_labels, yukMap, DateTimeLabel, anim3d )) 
     thread_dict['thread_StartListing'] = thread_StartListing
     thread_StartListing.create()
     thread_StartListing.start()

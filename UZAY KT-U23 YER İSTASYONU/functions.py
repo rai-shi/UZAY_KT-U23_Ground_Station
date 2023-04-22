@@ -13,7 +13,7 @@ import os
 
 import csv 
 
-# import ftplib
+import ftplib
 
 from pygrabber.dshow_graph import FilterGraph
 
@@ -209,11 +209,11 @@ def ProperAras(arasCode:str)->str:  # yanlış kodu -1 yollar
 
 def ProperHour(hour:str)->str:
     
-    pattern = "[0-9]+/[0-9]+/[0-9]+,[0-9]+/[0-9]+/[0-9]+"
+    pattern = "[0-9]+/[0-9]+/[0-9]+-[0-9]+/[0-9]+/[0-9]+"
     if re.fullmatch(pattern,hour):
         return hour 
     else:
-        return "00/00/2023,00/00/00"
+        return "00/00/2023-00/00/00"
 
 def isHeight(height_param:str)->bool:
 
@@ -341,7 +341,7 @@ def ConvertDatas(datas:list)->list:
     return properDatas
           
 
-def GetData(ser:serial.Serial, handler:HandleLine, text:Label, pureTeleLabel:Label)->tuple :
+def GetData(ser:serial.Serial, handler:HandleLine, text:Label)->tuple :
 
     pureData = b'' # serialden alınan veri
     properDatas = list() # her şeyi düzgünleştirilmiş veri
@@ -363,8 +363,7 @@ def GetData(ser:serial.Serial, handler:HandleLine, text:Label, pureTeleLabel:Lab
                     commaCount = strDatas.count(",") # 18
 
                     if (lessThanSignCount==19) and ( greaterThanSignCount==19) and ( commaCount==18 ):
-                        # veri düzgün "< > ," lar silinecek tek tek veriler kontrol edilecek
-                
+                        # veri düzgün "< > ," lar silinecek tek tek veriler kontrol edilecek              
                         strDatas = strDatas.replace("<"," ")
                         strDatas = strDatas.replace(">"," ")
                         datasList = strDatas.split(",")
@@ -445,7 +444,7 @@ def WriteAllOfIt(datas:list, tabFrame:Frame):
     for col in range(4):
         for rw in range(5):
             textData = Label(tabFrame, anchor = "w",width= 32, font=("Helvetica",9), text= (teleTitle[dataIndex]+ str(datas[dataIndex])+ units[dataIndex]), bg=light_grey)
-            textData.grid(row=rw, column=col, padx=4, pady=10)
+            textData.grid(row=rw, column=col, padx=10, pady=1)
             dataIndex = dataIndex +1 
 
 global packet
@@ -454,12 +453,10 @@ packet = 1
 def TeleTableListing(datas:list, tabFrame:Frame):
 
     global packet 
-    packetNum = Label(tabFrame, text = packet,bg= light_grey, anchor="w",width=6)
-    packetNum.grid(row=packet, column=0,padx=2.5, pady=0.5)
 
-    for item in range(1,20):
-        takenData = Label(tabFrame,text= datas[item-1],font=("Helvetica",8),bg= light_grey, anchor='w', width=6, borderwidth=2, relief="groove")  # 23
-        takenData.grid(row=packet, column=item, padx=2.5, pady=0.5)
+    for item in range(19):
+        takenData = Label(tabFrame,text= datas[item],font=("Helvetica",8),bg= light_grey, anchor='w', width=7, borderwidth=2, relief="groove")  
+        takenData.grid(row=packet, column=item, padx=2, pady=0.5)
 
     packet += 1
 
@@ -899,7 +896,7 @@ def storeCSV(datas:list):
 old_datas = list()
 all_datas = []
 x:int = 1
-def StartListing( event:threading.Event, ser: serial.Serial, handler:HandleLine, text:Label, dottabFrame:Frame, alltabFrame:Frame, pureTeleLabel:Label, packetText:Label, graphes:list, aras_frames:list, statu_labels:list, map_:tkintermapview.TkinterMapView, timeLabel:Label, app:App3D  ):
+def StartListing( event:threading.Event, ser: serial.Serial, handler:HandleLine, text:Label, dottabFrame:Frame, alltabFrame:Frame,  packetText:Label, graphes:list, aras_frames:list, statu_labels:list, map_:tkintermapview.TkinterMapView, timeLabel:Label, app:App3D  ):
     
     if event.is_set():
             return
@@ -911,7 +908,7 @@ def StartListing( event:threading.Event, ser: serial.Serial, handler:HandleLine,
     return_GetData = list()
     isData_Okey = bool()
 
-    isData_Okey, return_GetData = GetData(ser, handler, text,pureTeleLabel)
+    isData_Okey, return_GetData = GetData(ser, handler, text)
 
     if isData_Okey:          
         datas = return_GetData.copy()
@@ -941,7 +938,7 @@ def StartListing( event:threading.Event, ser: serial.Serial, handler:HandleLine,
         if 0 != len(all_datas):
             datas = all_datas[-1].copy()
 
-    text.after(800,StartListing,event, ser, handler, text, dottabFrame,alltabFrame,pureTeleLabel, packetText, graphes, aras_frames, statu_labels, map_, timeLabel, app)  # değiştirildi 700 de bir çağrılıyordu
+    text.after(700,StartListing,event, ser, handler, text, dottabFrame,alltabFrame, packetText, graphes, aras_frames, statu_labels, map_, timeLabel, app)  # değiştirildi 700 de bir çağrılıyordu
 
 def OpenCSV():
     path = os.getcwd()+ "/TELEMETRI VERILERI"
@@ -966,83 +963,127 @@ def kalibration(ser: serial.Serial):
 
 
 
+
+
+class FTPVersion():
+    def __init__(self, statelabel, pbar, server, name, password):
+        self.stateLabel = statelabel
+        self.uploadBar = pbar
+        self.serverEntry = server
+        self.nameEntry = name
+        self.passwordEntry = password
+    
+        self.ftp = None
+        self.filepath = None
+        self.file_size = None
+
+    # bağlantı kur
+    def Connect(self, event:threading.Event):
+        
+        serverIP= self.serverEntry.get(1.0, "end-1c")
+        name= self.nameEntry.get(1.0, "end-1c")
+        password = self.passwordEntry.get(1.0, "end-1c")
+        
+        print(serverIP)
+        print(name)
+        print(password)
+
+        # test ftp server
+        #serverIP= 'ftp.dlptest.com' 
+        #name= 'dlpuser' 
+        #password= 'rNrKYTX9g7z3RgJRmxWuGHbeu'
+
+        self.ftp = ftplib.FTP(serverIP)
+        self.ftp.login(name , password)
+
+        if(self.ftp.getwelcome()):
+            self.stateLabel["background"] = "green"
+            self.stateLabel["foreground"] = "white"
+            self.stateLabel.configure(text="Bağlantı Kuruldu")
+            print(self.ftp.getwelcome())
+
+    # dosya seçimi
+    def PickFile(self, event:threading.Event):
+        self.filepath = filedialog.askopenfilename(initialdir= "C:/Users/Pc/Downloads",
+                                            title= "Select File",
+                                            filetypes = (
+                                                            ("Video Files", "*.mp4"), 
+                                                        ("Image Files", "*.jpg;*.jpeg;*.png"), 
+                                                        ("All Files", "*.*") ) )  
+        
+        if self.filepath != None and self.filepath != '':
+            print(self.filepath)
+            self.stateLabel["background"] = "green"
+            self.stateLabel["foreground"] = "white"
+            self.stateLabel.configure(text="Dosya Seçildi")
+        else:
+            print(self.filepath)
+            self.stateLabel["background"] = "red"
+            self.stateLabel["foreground"] = "white"
+            self.stateLabel.configure(text="Dosya Seçilemedi")
+
+    # progress bar fonksiyonu
+    def UploadProgress(self, param): 
+        self.uploadBar['value'] += (8192*185)/self.file_size 
+
+    # dosya gönderimi
+    def SendFile(self, event:threading.Event):
+        start_time = time.time()
+
+        targetFile = open(self.filepath, "rb")
+        self.file_size = os.path.getsize(self.filepath)
+        if(self.ftp.getwelcome()):
+            transmission_start = time.time()
+            response = self.ftp.storbinary('STOR '+'uzayktu-23.mp4', targetFile, callback = self.UploadProgress ) # dosya gönderimi
+            transmission_done = time.time()
+            print("dosya gönderim süresi: " + str(transmission_done-transmission_start))
+
+            if response.startswith("226"):
+                self.stateLabel["background"] = "green"
+                self.stateLabel["foreground"] = "white"
+                self.stateLabel.configure(text="Aktarım Başarılı")
+            else:
+                print("Error occurred while sending file:", response)
+                self.stateLabel["background"] = "red"
+                self.stateLabel["foreground"] = "white"
+                self.stateLabel.configure(text="Aktarım Başarısız")
+
+            targetFile.close()
+            self.ftp.quit()
+            
+        finish_time = time.time()
+        print("tüm sending fonksiyonu süresi: " + str(finish_time-start_time))
+
+    # bağlantı koparılması
+    def Disconnect(self, event:threading.Event):
+        if event.is_set():
+            return
+        
+        try: # gönderim sırasında ise abortion yolla
+            self.ftp.voidcmd("ABOR")
+        except:
+            print("gönderim sırasında durdurulma hatası")
+
+        self.ftp.close() # kapat
+        # self.ftp.quit()
+
+        print(self.ftp.getwelcome())
+    
+
+        self.stateLabel["background"] = "orange"
+        self.stateLabel["foreground"] = "white"
+        self.stateLabel.configure(text="Bağlantı Kapatıldı")
+
+
+
+
+
+
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.service import Service
 import requests
-
-global IP
-IP = str()
-
-def getIP(IPtext:Text):
-     IPvalue = IPtext.get("1.0",END)
-     global IP 
-     IP = IPvalue
-
-def videoTransConnect(event:threading.Event, label:Label): 
-
-    if event.is_set():
-            return
-
-    global driver
-    try:
-        s = Service(r'C:/Users/Pc/Desktop/edgedriver_win64/msedgedriver')
-
-        options_ = webdriver.EdgeOptions() 
-        options_.add_argument("headless") 
-
-        driver = webdriver.Edge(service=s, options=options_)
-
-        global IP
-        address = IP+"/upload"
-        driver.get(address)
-
-        label.configure(text="Bağlantı Kuruldu", bg="green")
-        print("kuruldu")
-
-    except:
-        label.configure(text="Bağlantı Kurulamadı", bg="red")
-        print("olmadı")
-
-from tkinter import filedialog
-global file_path
-file_path:str
-def videoTransPickFile(label:Label):
-    global file_path
-    file_path = filedialog.askopenfilename(initialdir= "C:/Users/Pc/Downloads",
-                                            title= "Select File",
-                                            filetypes= ( ("video files","*.mp4"),
-                                                        ("all files","*.*") ) )  
-     
-    if file_path != None: 
-        label["background"] = "green"
-        label["foreground"] = "white"
-        label.configure(text="Dosya Seçildi")
-
-def videoTransSend(event:threading.Event, label:Label):
-    if event.is_set():
-            return
-    global driver 
-    global file_path
-    try:
-        # Dosya yükleme etiketine dosya yolu gönderme
-        file_input =  driver.find_element(by=By.NAME, value="fupload")
-        file_input.send_keys(file_path)
-
-        # Yükleme düğmesine tıklama
-        upload_button = driver.find_element(by=By.XPATH, value="/html/body/form/button")  
-        upload_button.click()
-
-        # Web sürücüsü kapatma
-        driver.quit()
-        print("video aktarımı başarılı")
-        label.configure(text="Aktarım Başarılı", bg="green")
-    except:
-        label.configure(text="Aktarım Başarısız", bg="red")
-    
-
-
-
 
 global video_name 
 video_name = str()
@@ -1126,97 +1167,78 @@ def ConnectServer(label:Label):
 
 
 
+class CameraStream:
+    def __init__(self):
+        self.cameraIndex = None 
+        self.capture = None 
+        self.out = None
+        self.win = None
+        self.camdevicesList = []
+        self.isStream = True
+
+    def startCamera(self,label:Label):
+
+        self.win.destroy()
+        self.capture = cv2.VideoCapture(0) 
+        self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        self.out = cv2.VideoWriter('uzaykt-u23.mp4', self.fourcc, 20.0, (640, 480))
+        self.showFrames(label)
+
+    def SelectCamera(self, camera_label:Label):
+        self.win = Tk()
+        self.win.title("Kamera Cihazını Seç")
+        self.win.geometry("300x300")
+        self.win.configure(bg=dark_grey)
+        
+        camFrame = Frame( self.win, width=200, height=225, bg= light_grey )
+        camFrame.pack(pady=10)
+        camFrame.pack_propagate(False)
+
+        camdevices = FilterGraph()
+        self.camdevicesList = camdevices.get_input_devices()
+        
+        camVariable = IntVar()
+        camIndex=0 # kullanılacak olan o
+        for camera in camdevices.get_input_devices():
+            Radiobutton(camFrame, text=camera, bg= light_grey, variable= camVariable, value=camIndex ).pack(padx=10, pady=5)
 
 
-global cameraIndex
-cameraIndex = int()
+        closeButton = Button(self.win, text="Tamam", width=15, command=lambda: self.startCamera(camera_label) )
+        closeButton.pack(side=BOTTOM, pady=5)
 
-def getCameraID(camVariable:IntVar, camIndex:int):
-    print( "get variable: " + str(camVariable.get()))   
-    global cameraIndex
-    if ( isinstance(cameraIndex, int) ):
-        cameraIndex = camVariable.get()
-    
-
-global capture_
-global out_
-
-global isStream
-isStream = True
-
-def startCamera(win:Tk, label:Label):
-
-    win.destroy()
-
-    global cameraIndex
-    capture = cv2.VideoCapture(1) 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    out = cv2.VideoWriter('uzaykt-u23.mp4', fourcc, 20.0, (640, 480))
-    global capture_
-    global out_ 
-    capture_ = capture
-    out_ = out
-    thread = threading.Thread(target=showFrames, args=(label, capture, out) )
-    thread.start()
-
-def SelectCamera(camera_label:Label):
-    camSelectingWin = Tk()
-    camSelectingWin.title("Kamera Cihazını Seç")
-    camSelectingWin.geometry("300x300")
-    camSelectingWin.configure(bg=dark_grey)
-    
-    camFrame = Frame( camSelectingWin, width=200, height=225, bg= light_grey )
-    camFrame.pack(pady=10)
-    camFrame.pack_propagate(False)
-
-    graph = FilterGraph()
-    
-    camVariable = IntVar()
-    camIndex=0
-  
-    for camera in graph.get_input_devices():
-        Radiobutton(camFrame, text=camera, bg= light_grey, variable= camVariable, value=camIndex, 
-                    command=lambda: getCameraID(camVariable, camIndex) ).pack(padx=10, pady=5)
-        camIndex += 1
-
-    closeButton = Button(camSelectingWin, text="Tamam", width=15, command=lambda: startCamera(camSelectingWin,camera_label ) )
-    closeButton.pack(side=BOTTOM, pady=5)
-    camSelectingWin.focus()
-
-def showFrames(camera_label:Label, capture, out):
-    global isStream
-    if isStream:
-        if capture.isOpened():
-            # read the capture
-            ret, frame = capture.read()
-
-            # record
-            out.write(frame)  
-
-            # turned into image and display  
-            cv2image = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
-            img = PIL.Image.fromarray(cv2image)
-            width, height = img.size 
-            img = img.resize((int(width/2),int(height/2)))
-            imgtk = ImageTk.PhotoImage(image = img) 
-            camera_label.imgtk = imgtk
-            camera_label.configure(image=imgtk,width=292,height=200)
+        self.win.focus()
 
 
-    camera_label.after(10,showFrames, camera_label, capture, out)
+    def showFrames(self, camera_label:Label):
+        if self.isStream:
+            if self.capture.isOpened():
+                # read the capture
+                ret, frame = self.capture.read()
 
-def finishStream():
-    global isStream
-    global capture_
-    global out_
-    # quit
-    #if not isStream: 
-    isStream = False  
-    capture_.release()
-    out_.release()
-    cv2.destroyAllWindows()
-    return
+                # record
+                self.out.write(frame)  
+
+                # turned into image and display  
+                cv2image = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+                img = PIL.Image.fromarray(cv2image)
+                width, height = img.size 
+                img = img.resize((int(width/2),int(height/2)))
+                imgtk = ImageTk.PhotoImage(image = img) 
+                camera_label.imgtk = imgtk
+                camera_label.configure(image=imgtk,width=292,height=200)
 
 
-def openCameraFile(): 
-    os.startfile(os.getcwd())
+        camera_label.after(10,self.showFrames, camera_label)
+
+    def finishStream(self):
+        self.isStream = False  
+        self.capture.release()
+        self.out.release()
+        cv2.destroyAllWindows()
+        return 
+
+    def openCameraFile(self):
+        os.startfile(os.getcwd())
+
+
+
