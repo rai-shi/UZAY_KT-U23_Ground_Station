@@ -219,19 +219,19 @@ videoTransTextFrame.grid(row=1,column=0, padx=4, pady=3)
 videoTransIPlabel = Label(videoTransTextFrame, text="IP: ", width=10, anchor="w", font= font_label, bg=light_grey)
 videoTransIPlabel.grid(row=0,column=0, padx=2, pady=3)
 videoTransIPtext = Text(videoTransTextFrame, width=13,height=1)
-videoTransIPtext.insert(END, "192.168.4.1")
+videoTransIPtext.insert(END, "192.168.4.5")
 videoTransIPtext.grid(row=0,column=1, pady=3)
 
 videoTransNamelabel = Label(videoTransTextFrame, text="Name: ", width=10, anchor="w", font= font_label, bg=light_grey)
 videoTransNamelabel.grid(row=1,column=0, padx=2, pady=2)
 videoTransNametext = Text(videoTransTextFrame, width=13,height=1)
-videoTransNametext.insert(END, "UzayKT-U23")
+videoTransNametext.insert(END, "HUMASERVER")
 videoTransNametext.grid(row=1,column=1, pady=2)
 
 videoTransPasswordlabel = Label(videoTransTextFrame, text="Password: ", width=10, anchor="w", font= font_label, bg=light_grey)
 videoTransPasswordlabel.grid(row=2,column=0, padx=2, pady=3)
 videoTransPasswordtext = Text(videoTransTextFrame, width=13,height=1)
-videoTransPasswordtext.insert(END, "123456")
+videoTransPasswordtext.insert(END, "123456789")
 videoTransPasswordtext.grid(row=2,column=1, pady=3)
 
 # Progress Bar

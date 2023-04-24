@@ -487,73 +487,24 @@ def StatuChange(statu_data:str, labels:list[Label] ):
             labels[0]['background'] = "green"
 
         if statu_data == "2":
-            labels[0]['background'] = "green"
             labels[1]['background'] = "green"
-            labels[2]['background'] = light_grey
-            labels[3]['background'] = light_grey
-            labels[4]['background'] = light_grey
-            labels[5]['background'] = light_grey
-            labels[6]['background'] = light_grey
-            labels[7]['background'] = light_grey
 
         if statu_data == "3":
-            labels[0]['background'] = "green"
-            labels[1]['background'] = "green"
             labels[2]['background'] = "green"
-            labels[3]['background'] = light_grey
-            labels[4]['background'] = light_grey
-            labels[5]['background'] = light_grey
-            labels[6]['background'] = light_grey
-            labels[7]['background'] = light_grey
 
         if statu_data == "4":
-            labels[0]['background'] = "green"
-            labels[1]['background'] = "green"
-            labels[2]['background'] = "green"
             labels[3]['background'] = "green"
-            labels[4]['background'] = light_grey
-            labels[5]['background'] = light_grey
-            labels[6]['background'] = light_grey
-            labels[7]['background'] = light_grey
 
         if statu_data == "5":
-            labels[0]['background'] = "green"
-            labels[1]['background'] = "green"
-            labels[2]['background'] = "green"
-            labels[3]['background'] = "green"
             labels[4]['background'] = "green"
-            labels[5]['background'] = light_grey
-            labels[6]['background'] = light_grey
-            labels[7]['background'] = light_grey
 
         if statu_data == "6":
-            labels[0]['background'] = "green"
-            labels[1]['background'] = "green"
-            labels[2]['background'] = "green"
-            labels[3]['background'] = "green"
-            labels[4]['background'] = "green"
             labels[5]['background'] = "green"
-            labels[6]['background'] = light_grey
-            labels[7]['background'] = light_grey
 
         if statu_data == "7":
-            labels[0]['background'] = "green"
-            labels[1]['background'] = "green"
-            labels[2]['background'] = "green"
-            labels[3]['background'] = "green"
-            labels[4]['background'] = "green"
-            labels[5]['background'] = "green"
             labels[6]['background'] = "green"
-            labels[7]['background'] = light_grey
 
         if statu_data == "8":
-            labels[0]['background'] = "green"
-            labels[1]['background'] = "green"
-            labels[2]['background'] = "green"
-            labels[3]['background'] = "green"
-            labels[4]['background'] = "green"
-            labels[5]['background'] = "green"
-            labels[6]['background'] = "green"
             labels[7]['background'] = "green"
 
         if statu_data == "GELISTIRME" :
@@ -988,28 +939,34 @@ class FTPVersion():
         print(name)
         print(password)
 
-        # test ftp server
-        #serverIP= 'ftp.dlptest.com' 
-        #name= 'dlpuser' 
-        #password= 'rNrKYTX9g7z3RgJRmxWuGHbeu'
+        try:
+            self.ftp = ftplib.FTP(serverIP)
+            self.ftp.login(name , password)
 
-        self.ftp = ftplib.FTP(serverIP)
-        self.ftp.login(name , password)
+            if(self.ftp.getwelcome()):
+                self.stateLabel["background"] = "green"
+                self.stateLabel["foreground"] = "white"
+                self.stateLabel.configure(text="Bağlantı Kuruldu")
+                print(self.ftp.getwelcome())
+            else:
+                self.stateLabel["background"] = "red"
+                self.stateLabel["foreground"] = "white"
+                self.stateLabel.configure(text="Bağlantı Kurulamadı")
+        except:
+            print("connection error")
 
-        if(self.ftp.getwelcome()):
-            self.stateLabel["background"] = "green"
-            self.stateLabel["foreground"] = "white"
-            self.stateLabel.configure(text="Bağlantı Kuruldu")
-            print(self.ftp.getwelcome())
+
+
 
     # dosya seçimi
     def PickFile(self, event:threading.Event):
         self.filepath = filedialog.askopenfilename(initialdir= "C:/Users/Pc/Downloads",
                                             title= "Select File",
                                             filetypes = (
-                                                            ("Video Files", "*.mp4"), 
+                                                        ("Video Files", "*.mp4"), 
                                                         ("Image Files", "*.jpg;*.jpeg;*.png"), 
                                                         ("All Files", "*.*") ) )  
+
         
         if self.filepath != None and self.filepath != '':
             print(self.filepath)
@@ -1034,7 +991,7 @@ class FTPVersion():
         self.file_size = os.path.getsize(self.filepath)
         if(self.ftp.getwelcome()):
             transmission_start = time.time()
-            response = self.ftp.storbinary('STOR '+'uzayktu-23.mp4', targetFile, callback = self.UploadProgress ) # dosya gönderimi
+            response = self.ftp.storbinary('STOR '+'uzayktu23.mp4', targetFile, callback = self.UploadProgress ) # dosya gönderimi
             transmission_done = time.time()
             print("dosya gönderim süresi: " + str(transmission_done-transmission_start))
 
@@ -1179,7 +1136,7 @@ class CameraStream:
     def startCamera(self,label:Label):
 
         self.win.destroy()
-        self.capture = cv2.VideoCapture(0) 
+        self.capture = cv2.VideoCapture(1) 
         self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         self.out = cv2.VideoWriter('uzaykt-u23.mp4', self.fourcc, 20.0, (640, 480))
         self.showFrames(label)
