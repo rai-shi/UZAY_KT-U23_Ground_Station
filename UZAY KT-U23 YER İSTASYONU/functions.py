@@ -39,7 +39,7 @@ import threading
 ktu_blue= "#1f5ba1"
 light_grey = "#C6C7CA"
 dark_grey= "#282A3A"
-
+"""
 def clock(label:Label):
     hour = time.strftime("%H")
     minute = time.strftime("%M")
@@ -50,7 +50,7 @@ def clock(label:Label):
     
     label.config(text= hour+":"+minute+":"+second+"   "+day+"/"+month+"/"+year)
     label.after(1000, clock, label)
-
+"""
 
 class threadFactory():
     def __init__(self,target_, args_:tuple=None, daemon_:bool=False ):
@@ -207,13 +207,13 @@ def ProperAras(arasCode:str)->str:  # yanlış kodu -1 yollar
 
     return aras1+aras2+aras3+aras4+aras5
 
-def ProperHour(hour:str)->str:
+def ProperHour(date:str)->str:
     
-    pattern = "[0-9]+/[0-9]+/[0-9]+-[0-9]+/[0-9]+/[0-9]+"
-    if re.fullmatch(pattern,hour):
-        return hour 
+    pattern = r"(\d{2}/\d{2}/\d{2},\d{2}/\d{2}/\d{2})"
+    if re.fullmatch(pattern,date):
+        return date 
     else:
-        return "00/00/2023-00/00/00"
+        return "00/00/2023,00/00/00"
 
 def isHeight(height_param:str)->bool:
 
@@ -252,7 +252,8 @@ def ConvertDatas(datas:list)->list:
     if datas[0].isdigit(): # counter
         properDatas.append(int(datas[0]))
     else:
-        properDatas.append(int("0"))
+        properDatas.append(int("-1"))
+
     if isStatusWord(datas[1]): #statu
         properDatas.append(str(datas[1]))
     else:
@@ -346,7 +347,6 @@ def GetData(ser:serial.Serial, handler:HandleLine, text:Label)->tuple :
     pureData = b'' # serialden alınan veri
     properDatas = list() # her şeyi düzgünleştirilmiş veri
 
-
     if ser.isOpen():
 
         pureData = handler.getDatas()
@@ -358,19 +358,22 @@ def GetData(ser:serial.Serial, handler:HandleLine, text:Label)->tuple :
                 #print(pureData)
                 try: 
                     strDatas = pureData.decode('UTF-8') # byte->str dönüşüm
+
+                    # date data içindeki comma için placeholder 
+                    temp_placeholder = "###"
+                    pattern = r"<(\d{2}/\d{2}/\d{2},\d{2}/\d{2}/\d{2})>"
+                    strDatas = re.sub(pattern, lambda m: m.group().replace(",", temp_placeholder), strDatas)
+
+
                     lessThanSignCount = strDatas.count("<") # 19
                     greaterThanSignCount = strDatas.count(">") # 19
                     commaCount = strDatas.count(",") # 18
 
                     if (lessThanSignCount==19) and ( greaterThanSignCount==19) and ( commaCount==18 ):
-                        # veri düzgün "< > ," lar silinecek tek tek veriler kontrol edilecek              
-                        strDatas = strDatas.replace("<"," ")
-                        strDatas = strDatas.replace(">"," ")
+                        # veri düzgün "< > ," lar silinecek tek tek veriler kontrol edilecek                               
                         datasList = strDatas.split(",")
-
-                        for item in range(0,19): # boşlukları silme
-                            datasList[item] = datasList[item].lstrip()
-                            datasList[item] = datasList[item].rstrip()
+                        datasList = [s.replace(temp_placeholder, ",") for s in datasList] # placeholder'ı değiştir.
+                        datasList = [s.strip("<>") for s in datasList]
 
                         lastElementOfDatasList = datasList[-1]
                         lastElementOfDatasList = lastElementOfDatasList.replace(" \r\n"," ")
@@ -486,28 +489,28 @@ def StatuChange(statu_data:str, labels:list[Label] ):
         if statu_data == "1":
             labels[0]['background'] = "green"
 
-        if statu_data == "2":
+        elif statu_data == "2":
             labels[1]['background'] = "green"
 
-        if statu_data == "3":
+        elif statu_data == "3":
             labels[2]['background'] = "green"
 
-        if statu_data == "4":
+        elif statu_data == "4":
             labels[3]['background'] = "green"
 
-        if statu_data == "5":
+        elif statu_data == "5":
             labels[4]['background'] = "green"
 
-        if statu_data == "6":
+        elif statu_data == "6":
             labels[5]['background'] = "green"
 
-        if statu_data == "7":
+        elif statu_data == "7":
             labels[6]['background'] = "green"
 
-        if statu_data == "8":
+        elif statu_data == "8":
             labels[7]['background'] = "green"
 
-        if statu_data == "GELISTIRME" :
+        elif statu_data == "GELISTIRME" :
             labels[0]['background'] = "blue"
             labels[1]['background'] = "blue"
             labels[2]['background'] = "blue"
@@ -912,17 +915,36 @@ def kalibration(ser: serial.Serial):
     if (ser.isOpen() ):
         ser.write(buzzertext)
 
+def send_c(ser: serial.Serial): 
+    text_c= b'c'
+    if (ser.isOpen() ):
+        ser.write(text_c)
+
+def send_v(ser: serial.Serial): 
+    text_v= b'v'
+    if (ser.isOpen() ):
+        ser.write(text_v)
+
+def send_d(ser: serial.Serial): 
+    text_d= b'd'
+    if (ser.isOpen() ):
+        ser.write(text_d)
+
 
 
 
 
 class FTPVersion():
-    def __init__(self, statelabel, pbar, server, name, password):
+
+
+    def __init__(self, statelabel, pbar, server, name, password, ser):
         self.stateLabel = statelabel
         self.uploadBar = pbar
         self.serverEntry = server
         self.nameEntry = name
         self.passwordEntry = password
+
+        self.ser = ser
     
         self.ftp = None
         self.filepath = None
@@ -940,6 +962,9 @@ class FTPVersion():
         print(password)
 
         try:
+            self.stateLabel["background"] = "Orange"
+            self.stateLabel["foreground"] = "white"
+            self.stateLabel.configure(text="Bağantı Kuruluyor")
             self.ftp = ftplib.FTP(serverIP)
             self.ftp.login(name , password)
 
@@ -953,9 +978,9 @@ class FTPVersion():
                 self.stateLabel["foreground"] = "white"
                 self.stateLabel.configure(text="Bağlantı Kurulamadı")
         except:
-            print("connection error")
-
-
+            self.stateLabel["background"] = "red"
+            self.stateLabel["foreground"] = "white"
+            self.stateLabel.configure(text="Hata: bağlantı")
 
 
     # dosya seçimi
@@ -979,37 +1004,62 @@ class FTPVersion():
             self.stateLabel["foreground"] = "white"
             self.stateLabel.configure(text="Dosya Seçilemedi")
 
+
     # progress bar fonksiyonu
     def UploadProgress(self, param): 
         self.uploadBar['value'] += (8192*185)/self.file_size 
 
+
     # dosya gönderimi
     def SendFile(self, event:threading.Event):
         start_time = time.time()
-
         targetFile = open(self.filepath, "rb")
         self.file_size = os.path.getsize(self.filepath)
-        if(self.ftp.getwelcome()):
-            transmission_start = time.time()
-            response = self.ftp.storbinary('STOR '+'uzayktu23.mp4', targetFile, callback = self.UploadProgress ) # dosya gönderimi
-            transmission_done = time.time()
-            print("dosya gönderim süresi: " + str(transmission_done-transmission_start))
 
-            if response.startswith("226"):
-                self.stateLabel["background"] = "green"
-                self.stateLabel["foreground"] = "white"
-                self.stateLabel.configure(text="Aktarım Başarılı")
-            else:
-                print("Error occurred while sending file:", response)
+        while True:
+            try:
+                self.ftp.sendcmd('NOOP')
+                print("Connection is still alive.")
+            except ftplib.all_errors:
+                print("Connection is lost.")
+                self.ftp.quit()
+                self.Connect(None) 
+            try:
+                if(self.ftp.getwelcome()):
+                    self.stateLabel["background"] = "orange"
+                    self.stateLabel["foreground"] = "white"
+                    self.stateLabel.configure(text="Gönderim Başlıyor")
+                    transmission_start = time.time()
+                    response = self.ftp.storbinary('STOR '+'uzayktu-23.mp4', targetFile, callback = self.UploadProgress ) # dosya gönderimi
+                    time.sleep(0.002)
+                    send_v(self.ser)
+                    transmission_done = time.time()
+                    print("dosya gönderim süresi: " + str(transmission_done-transmission_start))
+                    if response.startswith("226"):
+                        self.stateLabel["background"] = "green"
+                        self.stateLabel["foreground"] = "white"
+                        self.stateLabel.configure(text="Aktarım Başarılı")
+                        break
+                    else:
+                        print("Error occurred while sending file:", response)
+                        self.stateLabel["background"] = "red"
+                        self.stateLabel["foreground"] = "white"
+                        self.stateLabel.configure(text="Aktarım Başarısız")   
+            except ftplib.all_errors as e:
+                print(e)
                 self.stateLabel["background"] = "red"
                 self.stateLabel["foreground"] = "white"
-                self.stateLabel.configure(text="Aktarım Başarısız")
+                self.stateLabel.configure(text="aktarım hatası") 
 
-            targetFile.close()
-            self.ftp.quit()
+
+
+        targetFile.close()
+        self.ftp.quit()
             
         finish_time = time.time()
         print("tüm sending fonksiyonu süresi: " + str(finish_time-start_time))
+
+
 
     # bağlantı koparılması
     def Disconnect(self, event:threading.Event):
@@ -1017,19 +1067,30 @@ class FTPVersion():
             return
         
         try: # gönderim sırasında ise abortion yolla
-            self.ftp.voidcmd("ABOR")
+            self.ftp.abort()
         except:
-            print("gönderim sırasında durdurulma hatası")
+            print("abortion hatası")
 
-        self.ftp.close() # kapat
-        # self.ftp.quit()
+        try:
+            self.ftp.quit() 
+            response = self.ftp.getresp()
+            if response == '221' or response == '226':
+                self.stateLabel["background"] = "orange"
+                self.stateLabel["foreground"] = "white"
+                self.stateLabel.configure(text="Bağlantı Kapatıldı")
+                print(self.ftp.getwelcome())
+            else:
+                self.stateLabel["background"] = "red"
+                self.stateLabel["foreground"] = "white"
+                self.stateLabel.configure(text="Bağlantı Kapatılamadı")
+        except :
+            print("quit ya da response hatası")
 
-        print(self.ftp.getwelcome())
+
+            
     
 
-        self.stateLabel["background"] = "orange"
-        self.stateLabel["foreground"] = "white"
-        self.stateLabel.configure(text="Bağlantı Kapatıldı")
+         
 
 
 
@@ -1125,23 +1186,24 @@ def ConnectServer(label:Label):
 
 
 class CameraStream:
-    def __init__(self):
+    def __init__(self, label):
         self.cameraIndex = None 
         self.capture = None 
         self.out = None
         self.win = None
         self.camdevicesList = []
         self.isStream = True
+        self.camera_label = label
 
-    def startCamera(self,label:Label):
+    def startCamera(self):
 
         self.win.destroy()
-        self.capture = cv2.VideoCapture(1) 
+        self.capture = cv2.VideoCapture(0) 
         self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        self.out = cv2.VideoWriter('uzaykt-u23.mp4', self.fourcc, 20.0, (640, 480))
-        self.showFrames(label)
+        self.out = cv2.VideoWriter('CAMERA/uzaykt-u23.mp4', self.fourcc, 20.0, (640, 480))
+        self.showFrames()
 
-    def SelectCamera(self, camera_label:Label):
+    def SelectCamera(self):
         self.win = Tk()
         self.win.title("Kamera Cihazını Seç")
         self.win.geometry("300x300")
@@ -1159,14 +1221,14 @@ class CameraStream:
         for camera in camdevices.get_input_devices():
             Radiobutton(camFrame, text=camera, bg= light_grey, variable= camVariable, value=camIndex ).pack(padx=10, pady=5)
 
-
-        closeButton = Button(self.win, text="Tamam", width=15, command=lambda: self.startCamera(camera_label) )
+        self.isStream = True
+        closeButton = Button(self.win, text="Tamam", width=15, command= self.startCamera )
         closeButton.pack(side=BOTTOM, pady=5)
 
         self.win.focus()
 
 
-    def showFrames(self, camera_label:Label):
+    def showFrames(self):
         if self.isStream:
             if self.capture.isOpened():
                 # read the capture
@@ -1181,21 +1243,24 @@ class CameraStream:
                 width, height = img.size 
                 img = img.resize((int(width/2),int(height/2)))
                 imgtk = ImageTk.PhotoImage(image = img) 
-                camera_label.imgtk = imgtk
-                camera_label.configure(image=imgtk,width=292,height=200)
+                self.camera_label.imgtk = imgtk
+                self.camera_label.configure(image=imgtk,width=292,height=200)
 
 
-        camera_label.after(10,self.showFrames, camera_label)
+        self.camera_label.after(10,self.showFrames)
 
     def finishStream(self):
-        self.isStream = False  
-        self.capture.release()
-        self.out.release()
-        cv2.destroyAllWindows()
+        if self.isStream == True:
+            self.isStream = False  
+            self.capture.release()
+            self.out.release()
+            cv2.destroyAllWindows()
+            self.camera_label.configure(image='', width=42,height=13, bg = light_grey)
         return 
 
     def openCameraFile(self):
-        os.startfile(os.getcwd())
+        path = os.getcwd()+ "/CAMERA"
+        os.startfile(path)
 
 
 

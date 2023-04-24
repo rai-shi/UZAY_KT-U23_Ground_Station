@@ -103,29 +103,47 @@ Aras_leaving.grid(row=0,column=4,**aras_margins)
 
 aras_frames = [Aras_svelocity, Aras_cvelocity, Aras_cpressure, Aras_slocation, Aras_leaving]
 
-top_button_margins = {'padx':8, 'pady':2}
+top_button_margins = {'padx':4, 'pady':2}
 
-def t_buzzer(ser:serial.Serial):
-   threading.Thread(target=buzzer, args=ser ).start()
+#def t_buzzer(ser:serial.Serial):
+#   threading.Thread(target=buzzer, args=ser ).start()
 
-BuzzerButton = Button(TopFrame, text="BUZZER", font=font_button, width=15, command= lambda:buzzer(ser) )
+BuzzerButton = Button(TopFrame, text="BUZZER", font=font_button, width=8, command= lambda:buzzer(ser) )
 BuzzerButton.grid(row=0, column=4, **top_button_margins)
 
-def t_leave(ser:serial.Serial):
-   threading.Thread(target=leave, args=ser ).start()
+#def t_leave(ser:serial.Serial):
+#   threading.Thread(target=leave, args=ser ).start()
 
-LeaveButton = Button(TopFrame, text="AYRIL", font=font_button, width=15, command= lambda: leave(ser) )
+LeaveButton = Button(TopFrame, text="AYRIL", font=font_button, width=8, command= lambda: leave(ser) )
 LeaveButton.grid(row=0, column=5, **top_button_margins)
 
-def t_kalibration(ser:serial.Serial):
-   threading.Thread(target=kalibration, args=ser ).start()
+#def t_kalibration(ser:serial.Serial):
+#   threading.Thread(target=kalibration, args=ser ).start()
 
-Calibbutton = Button(TopFrame, text="T.KALİBRASYON", font=font_button, width=15, command= lambda: kalibration(ser) )
+Calibbutton = Button(TopFrame, text="T.KALİB.", font=font_button, width=8, command= lambda: kalibration(ser) )
 Calibbutton.grid(row=0, column=6, **top_button_margins)
+
+#def t_send_c(ser:serial.Serial):
+#   threading.Thread(target=send_c, args=ser ).start()
+
+c_button = Button(TopFrame, text="C", font=font_button, width=5, command= lambda: send_c(ser) )
+c_button.grid(row=0, column=7, **top_button_margins)
+
+#def t_send_v(ser:serial.Serial):
+#   threading.Thread(target=send_v, args=ser ).start()
+
+v_button = Button(TopFrame, text="V", font=font_button, width=5, command= lambda: send_v(ser) )
+v_button.grid(row=0, column=8, **top_button_margins)
+
+#def t_send_d(ser:serial.Serial):
+#   threading.Thread(target=send_d, args=ser ).start()
+
+d_button = Button(TopFrame, text="D", font=font_button, width=5, command= lambda: send_d(ser) )
+d_button.grid(row=0, column=9, **top_button_margins)
 
 
 batteryFrame = Frame(TopFrame,bg=dark_grey)
-batteryFrame.grid(row=0,column=7,padx=(40,5), pady=10)
+batteryFrame.grid(row=0,column=10,padx=(50,5), pady=10)
 
 
 
@@ -219,7 +237,7 @@ videoTransTextFrame.grid(row=1,column=0, padx=4, pady=3)
 videoTransIPlabel = Label(videoTransTextFrame, text="IP: ", width=10, anchor="w", font= font_label, bg=light_grey)
 videoTransIPlabel.grid(row=0,column=0, padx=2, pady=3)
 videoTransIPtext = Text(videoTransTextFrame, width=13,height=1)
-videoTransIPtext.insert(END, "192.168.4.5")
+videoTransIPtext.insert(END, "192.168.4.25")
 videoTransIPtext.grid(row=0,column=1, pady=3)
 
 videoTransNamelabel = Label(videoTransTextFrame, text="Name: ", width=10, anchor="w", font= font_label, bg=light_grey)
@@ -240,7 +258,7 @@ FTPprogressBar = ttk.Progressbar(videoTransferFrame,
 FTPprogressBar.grid(row=3, column=0, pady=3)
 
 
-ftp_object = FTPVersion(videoTransStatu, FTPprogressBar, videoTransIPtext, videoTransNametext, videoTransPasswordtext)
+ftp_object = FTPVersion(videoTransStatu, FTPprogressBar, videoTransIPtext, videoTransNametext, videoTransPasswordtext, ser)
 
 def create_thread_Connect():
     threadgetConnect = threadFactory(target_=ftp_object.Connect )
@@ -332,9 +350,9 @@ camera_label.grid(row=0,column=0, pady=2)
 cameraButtonFrame = Frame(cameraFrame, bg= light_grey) 
 cameraButtonFrame.grid(row=1,column=0,padx=1, pady=2)
 
-cam = CameraStream()
+cam = CameraStream(camera_label)
 
-cameraConnectButton = Button(cameraButtonFrame, text=u"Kameraya Bağlan", width=13, command = lambda : cam.SelectCamera(camera_label) )
+cameraConnectButton = Button(cameraButtonFrame, text=u"Kameraya Bağlan", width=13, command = cam.SelectCamera )
 cameraConnectButton.grid(row=0,column=0,padx=1)
 
 cameraStopButton = Button(cameraButtonFrame, text=u"Kaydı Bitir",width=10, command= cam.finishStream)
