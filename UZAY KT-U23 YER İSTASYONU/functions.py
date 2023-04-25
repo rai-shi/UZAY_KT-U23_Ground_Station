@@ -209,7 +209,7 @@ def ProperAras(arasCode:str)->str:  # yanlış kodu -1 yollar
 
 def ProperHour(date:str)->str:
     
-    pattern = r"(\d{2}/\d{2}/\d{2},\d{2}/\d{2}/\d{2})"
+    pattern = r"(\d+/\d+/\d+,\d+/\d+/\d+)"
     if re.fullmatch(pattern,date):
         return date 
     else:
@@ -361,8 +361,9 @@ def GetData(ser:serial.Serial, handler:HandleLine, text:Label)->tuple :
 
                     # date data içindeki comma için placeholder 
                     temp_placeholder = "###"
-                    pattern = r"<(\d{2}/\d{2}/\d{2},\d{2}/\d{2}/\d{2})>"
+                    pattern = r"<(\d+/\d+/\d+,\d+/\d+/\d+)>"
                     strDatas = re.sub(pattern, lambda m: m.group().replace(",", temp_placeholder), strDatas)
+                    print(strDatas)
 
 
                     lessThanSignCount = strDatas.count("<") # 19
@@ -370,7 +371,8 @@ def GetData(ser:serial.Serial, handler:HandleLine, text:Label)->tuple :
                     commaCount = strDatas.count(",") # 18
 
                     if (lessThanSignCount==19) and ( greaterThanSignCount==19) and ( commaCount==18 ):
-                        # veri düzgün "< > ," lar silinecek tek tek veriler kontrol edilecek                               
+                        # veri düzgün "< > ," lar silinecek tek tek veriler kontrol edilecek   
+                        print()                            
                         datasList = strDatas.split(",")
                         datasList = [s.replace(temp_placeholder, ",") for s in datasList] # placeholder'ı değiştir.
                         datasList = [s.strip("<>") for s in datasList]
@@ -929,6 +931,11 @@ def send_d(ser: serial.Serial):
     text_d= b'd'
     if (ser.isOpen() ):
         ser.write(text_d)
+
+def send_z(ser: serial.Serial): 
+    text_z= b'z'
+    if (ser.isOpen() ):
+        ser.write(text_z)
 
 
 

@@ -82,7 +82,7 @@ PacketLabel = Label(TopFrame,text="GELEN PAKET ADEDİ: 1000", width=24, font=fon
 PacketLabel.grid(row=0,column=2,**topFrame_margings)
 
 ArasFrame = Frame(TopFrame,bg=light_grey)
-ArasFrame.grid(row=0,column=3,padx=20,pady=10)
+ArasFrame.grid(row=0,column=3,padx=15,pady=10)
 
 aras_margins= {'padx':1, 'pady':1}
 
@@ -141,9 +141,12 @@ v_button.grid(row=0, column=8, **top_button_margins)
 d_button = Button(TopFrame, text="D", font=font_button, width=5, command= lambda: send_d(ser) )
 d_button.grid(row=0, column=9, **top_button_margins)
 
+z_button = Button(TopFrame, text="Z", font=font_button, width=5, command= lambda: send_z(ser) )
+z_button.grid(row=0, column=10, **top_button_margins)
+
 
 batteryFrame = Frame(TopFrame,bg=dark_grey)
-batteryFrame.grid(row=0,column=10,padx=(50,5), pady=10)
+batteryFrame.grid(row=0,column=11,padx=(35,5), pady=10)
 
 
 
