@@ -53,19 +53,32 @@ font_label = Font(family = "Helvetica", size = 9)
 font_big = Font(family = "Helvetica", size = 16)
 
 
-#global değişkenler
+# global değişkenler
 ser = serial.Serial()
 handler = HandleLine()
 TeleDatas=list()
 old_datas = list()
 thread_dict = {}
 
+# paths
+global basePath
+basePath = os.path.join(os.getcwd(), "UZAY KT-U23 YER İSTASYONU")
+if not os.path.exists(basePath):
+    basePath = os.path.join(os.getcwd())
+print(basePath)
+
+global logoPath
+logoPath= os.path.join(basePath, "image","logo.png")
+print(logoPath)
+
+global telemetryPath 
+telemetryPath = os.path.join(basePath, "TELEMETRI VERILERI","telemetri.csv")
+print(telemetryPath)
 
 # iconbitmap
-root.iconphoto(True, ImageTk.PhotoImage(PIL.Image.open("logo.png")))
+root.iconphoto(True, ImageTk.PhotoImage(PIL.Image.open(logoPath)))
 
-#TOP
-
+# TOP
 TopFrame = Frame(root, width=1920, height=50, padx=0, pady=0, bg=dark_grey)
 TopFrame.grid(row=0,column=0)
 TopFrame.grid_propagate(False)
@@ -181,7 +194,7 @@ narrowFrame_options = {'width':230}
 narrowFrame_text_options = {'anchor':'w', 'width':32 }
 
 #LOGO
-logo = ImageTk.PhotoImage(PIL.Image.open("logo.png").resize((95,95)))
+logo = ImageTk.PhotoImage(PIL.Image.open(logoPath).resize((95,95)))
 logoLabel = Label( narrowFrame, image=logo, bg=dark_grey)
 logoLabel.grid(row=0,column=0,padx=75)
 
@@ -737,9 +750,10 @@ def battery_progress():
 if __name__== "__main__":
 
     # dosyayı temizleme
-    if (os.path.exists("TELEMETRI VERILERI/telemetri.csv")):
 
-        datafile_csv = open("TELEMETRI VERILERI/telemetri.csv", "a", newline='')
+    if (os.path.exists(telemetryPath)):
+
+        datafile_csv = open(telemetryPath, "a", newline='')
         datafile_csv.seek(0)
         datafile_csv.truncate(0)
 
