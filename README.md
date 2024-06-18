@@ -1,4 +1,4 @@
-# NeilA Ground Station Interface
+# UZAY KT-U23 Ground Station Interface
 
 UZAY KT-U23 Ground Station Interface is developed for the Teknofest 8th Model Satellite Competition to act as a ground station. The project visualizes the data received every second from an ESP module. 
 the task of Ground Station have to do:
