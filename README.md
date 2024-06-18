@@ -41,7 +41,7 @@ Lastly top right side ploting area and the bottom right side there is all teleme
 Ensure you have the following libraries installed:
 
 ```bash
-pip install tkinter matplotlib pillow psutil pyserial opencv-python tkintermapview pygrabber
+pip install tkinter matplotlib pillow psutil pyserial opencv-python tkintermapview pygrabber PyOpenGL
 ```
 ## Usage Instructions
 To run the project, execute the following file:
