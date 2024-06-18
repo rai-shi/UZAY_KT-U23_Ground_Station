@@ -35,14 +35,13 @@ Lastly top right side ploting area and the bottom right side there is all teleme
 - **Camera Display and Recording:** OpenCV
 - **Serial Data Communication:** serial
 - **Asynchronous Video Streaming:** ftplib
-   **Selecting Camera Devices:** pygrabber
 
 ## Installation Instructions
 
 Ensure you have the following libraries installed:
 
 ```bash
-pip install tkinter matplotlib pillow psutil pyserial opencv-python tkintermapview
+pip install tkinter matplotlib pillow psutil pyserial opencv-python tkintermapview pygrabber
 ```
 ## Usage Instructions
 To run the project, execute the following file:
