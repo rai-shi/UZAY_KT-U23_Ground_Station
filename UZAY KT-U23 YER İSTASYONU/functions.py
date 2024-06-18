@@ -262,7 +262,7 @@ def ConvertDatas(datas:list)->list:
 
     properDatas.append(ProperAras(datas[2])) # aras
 
-    properDatas.append(ProperHour(datas[3])) # saat 
+    properDatas.append(ProperHHour(datas[3])) # saat 
  
     if datas[4].replace('.','',1).isdigit():  #basınç1
         properDatas.append(float(datas[4]))
