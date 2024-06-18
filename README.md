@@ -23,7 +23,7 @@ On the top there is mission time, team id, packet count num, aras, some command 
 On the left side there is team logo, payload mission statu displaying area, serial port connection and csv handling area, asynchronously video transmission via ftp area, and on the bottom there is a area for recieving the video file back. 
 On the second column of the top there is a camera displaying area, then map area and 3d position area. 
 Lastly top right side ploting area and the bottom right side there is all telemetry displaying area. One of them is instant displaying and other one is table like displaying of all telemetry data.
-![alt text](https://github.com/rai-shi/NEILA-Ground_Station/blob/master/ui8.png?raw=true)
+![alt text](https://github.com/rai-shi/UZAY_KT-U23_Ground_Station/blob/master/ui8.png?raw=true)
 
 ## Technologies Used
 
@@ -33,8 +33,9 @@ Lastly top right side ploting area and the bottom right side there is all teleme
 - **Satellite Position Animation:** OpenGL
 - **Map View:** TkinterMapView
 - **Camera Display and Recording:** OpenCV
-- **Serial Data Communication:** Serial
-- **Asynchronous Video Streaming:** Ftplib
+- **Serial Data Communication:** serial
+- **Asynchronous Video Streaming:** ftplib
+   **Selecting Camera Devices:** pygrabber
 
 ## Installation Instructions
 
@@ -57,6 +58,5 @@ path\to\UZAY_KT-U23_Ground_Station\UZAY KT-U23 YER İSTASYONU\functions.py
 
 ## Contributing
 The project currently experiences performance issues and frequent program freezes after running for long time. The threading implementation needs improvement. It is more reliable then my previous one ([NeliA Ground Station](https://github.com/rai-shi/NEILA-Ground_Station)) but still is not perfect. Contributions focusing on threading and optimization are welcome.
-
 Contact Information
 For any inquiries or feedback, please contact: aysenurtak1@gmail.com
